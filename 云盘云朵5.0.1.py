@@ -75,7 +75,6 @@ class YP:
         }
 
     # 捕获异常
-    @staticmethod
     def catch_errors(func):
         def wrapper(self, *args, **kwargs):
             try:
