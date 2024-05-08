@@ -4,7 +4,7 @@
 # https://yunbusiness.ccb.com/basic_service/txCtrl?  请求头中token值，deviceid值。请求体meb_id或者userid值
 # 专区任务，专区抓fission-events.ccbft.com，全部cookie,或者cookie里面_ck_bbq_224的 键和值  已去除，不需要了
 # 格式 ccdck =  deviceid值#meb_id值#手机号#token值
-# 定时：0 0 8,9 * * *
+# 定时：0 8,9 * * *
 # 注: 此脚本仅限个人使用,不得传播
 # 作者: 洋洋不瘦
 # 更新 1.19
