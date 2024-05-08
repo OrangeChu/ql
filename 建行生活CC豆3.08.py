@@ -11,7 +11,7 @@
 # 修复专区,去除专区cookie值
 """
 new Env('建行生活CC豆');
-0 8,9 * * *
+cron: 0 8,9 * * *
 """
 import os
 import random
