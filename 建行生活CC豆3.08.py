@@ -1106,6 +1106,7 @@ if __name__ == "__main__":
 
     for i, cookie in enumerate(cookies, start = 1):
         print(f"\n======== ▷ 第 {i} 个账号 ◁ ========")
+        time.sleep(random.randint(60, 6000))
         CCD(cookie).auth_login()
         print("\n随机等待5-10s进行下一个账号")
         time.sleep(random.randint(5, 10))
