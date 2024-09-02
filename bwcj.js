@@ -308,10 +308,7 @@ class _0x5026b8 extends _0x4c79d9 {
   }
   async ["takePartInSign"](_0x358d5a = {}) {
     try {
-      const _0xce18e9 = {
-        activityId: "947079313798000641",
-        "appid": "wxafec6f8422cb357b"
-      };
+      const _0xce18e9 = {"activityId":"947079313798000641","storeId":49006,"timestamp":"1725239303857","signature":"0F5782CC3FE77097AA2F60437EF1C354","appid":"wxafec6f8422cb357b","store_id":49006};
       const _0x1134c5 = {
         fn: "takePartInSign",
         method: "post",
