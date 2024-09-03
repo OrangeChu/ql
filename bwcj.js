@@ -184,7 +184,9 @@ class _0x5026b8 extends _0x4c79d9 {
         this.userName = _0x268ef0;
       } else {
         let _0x1dd339 = _0x22822c.get(_0x1f1cc3, "message", '');
-        this.log("登录失败: " + _0x1dd339);
+        this.log("登录失败（cookie可能已失效）: " + _0x1dd339,{
+          notify: true
+        });
       }
     } catch (_0x4a53e4) {
       console.log(_0x4a53e4);
