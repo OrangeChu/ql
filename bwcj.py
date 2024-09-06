@@ -100,7 +100,7 @@ def yx(ck, uid):
             json_data = {
                 'activityId': activity_id,
                 'mobilePhone': dl['data']['mobilePhone'],
-                'userName': dl['data'].get('userName', ''),
+                'userName': dl['data'].get('name', ''),
                 'appid': 'wxafec6f8422cb357b'
             }
             
