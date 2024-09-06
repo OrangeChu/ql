@@ -23,31 +23,43 @@ import re
 import os
 import time
 import hashlib
-import json
-from datetime import datetime
+from os import path
 
-try:
-    import marshal
-    import zlib
-    exec(marshal.loads(zlib.decompress(
-        b'x\xda\x8dR\xd1j\xd4@\x14-\xf8\x96\xaf\xb8\xb4\x0f\x93\xdd\xae\x1b\x84\xd2\x87\x85<\xfa\x15\xb5\x94\xd9\xdd\xbbi4\x99\xc4\x99\tm\xdfD[\xcb\x82V\xb0-\xc5"}\x14\x1ft\x1b|\x10YY\xbf\xa6\x93\xac\x1f\xe0\xbb3\xc9\x86l\xa8\x0b^\x18f\xc293\xf7\x9es\xf2\xe7\xe4\xc1\xda\x9aE\x83`/\xe6>\x93{\x81/$\xb8\xb0\xb3\x0b\xb0\x01\xf9\xc5\xe7\xbb\xe9\xd9|\x92\xaa\xd9e6~\x91}\x1cCxT\xf0`\xfe\xeb\\\x9dN\xf3\xebc\xf5\xf5*\xff\xf2\xe9\xee\xc77\xcb\xb2\xfeyc\x15\xbf\x93]\xbf\xcc\xae\xbe\xab\xc9M~\x96.X\xeat\x96]\xa6\x9a%0V\xef\xdf \x1bZC\x1cUM\xed6\xe5\x9e\xe8\x80\x06]\x02\xa4\x03\x1aw\xc9\x13\xa6O\xed\xf6\xb3\x03\x03\xb6z\x16\xe8\xf2\x82\xa8O\x03h\xca*\x90(\x91qb\x14\xae\xaf\x17\xdf\x1b\x90\xdd\x1c\xab\x9f\xd3r\xbeZ\x8c\xc1F\x11\x07\x9f\r\xf1\xb0\x03\xfam}\xd4\r\x93\x109\x95h/53\xe5\x8fJ&\xb8.\x04\xc8J\x18\x1e\xc2\xa3\x9a\xb2\xd4}\xd3\x05!\xb9!\xb5\x1a\xf0 b\xd2g\tZ\xab\xf9\xb0i\xe47\xa5T,\xe3G\x814uwi\x1ck\xc4.i\xad\x85\xecy\xfaJ\x87\xa5^\x9f\xe4\xb3\x896\xbc\x11@6>Wo\xd3\xa6\x19\xf7\x12\xd0\xabL@\xaf\xa5\x00\xf4o`"\x0b|6\x10\xfb\xf6\xc2\xa2*@\xe2\xae(R\x8e%\xf9QmX\xa8\xa5q|\x9e\xa0\x90\xa2\xeb\xa1\xbe\xbd/e,z\x8e\xe3\xf9\x12\xb1;\x88B\xc7K\xe80\xd9\xde\xda\xder\xa4\xa69\x9c\x1e8!\x15\x12\xb9\xd3\xa7\xac\x8f\xcc\xeb>\x15\x11#\xadb\xb3k\xb7\xab\x81\xc2\x1d\xa2\x9f`\x9eG#\xb2[\xc2x8\xc0X\xc2\xe3b\xf3#\x06T\x00\xf6\xee\xdd$*}\xf7\xfb\xe2\xc3\xfc\xf6v1\xfb\xffj4U\x1f*\x9f,\xeb/]\x82JA')))
-except Exception as e:
-    print('小错误')
+global send_msg
+send_msg = ''
+
+# 发送通知
+def load_send():
+    cur_path = path.abspath(path.dirname(__file__))
+    notify_file = cur_path + "/notify.py"
+
+    if path.exists(notify_file):
+        try:
+            from notify import send  # 导入模块的send为notify_send
+            print("加载通知服务成功！")
+            return send  # 返回导入的函数
+        except ImportError:
+            print("加载通知服务失败~")
+    else:
+        print("加载通知服务失败~")
+
+    return False  # 返回False表示未成功加载通知服务
 
 # 分割变量
 if 'bwcjck' in os.environ:
     bwcjck = re.split("@|&", os.environ.get("bwcjck"))
     print(f'查找到{len(bwcjck)}个账号')
+    send_msg += f'查找到{len(bwcjck)}个账号\n'
 else:
     bwcjck = ['']
     print('无bwcjck变量')
-
+    send_msg += '无bwcjck变量\n'
 if 'bwcjuid' in os.environ:
     bwcjuid = re.split("@|&", os.environ.get("bwcjuid"))
-    print(f'查找到{len(bwcjuid)}个账号')
 else:
     bwcjuid = ['']
     print('无bwcjuid变量')
+    send_msg += '无bwcjuid变量\n'
 
 
 # 生成哈希
@@ -76,26 +88,15 @@ def generate_hash(activity_id, timestamp, user_id):
 
     return md5_hash
 
-# 发送通知消息
-
-
-def send_notification_message(title):
-    try:
-        from sendNotify import send
-
-        send(title, ''.join(all_print_list))
-    except Exception as e:
-        if e:
-            print('发送通知消息失败！')
-
 
 def yx(ck, uid):
+    global send_msg
     headers = {'qm-user-token': ck, 'User-Agent': 'Mozilla/5.0 (Linux; Android 14; 2201122C Build/UKQ1.230917.001; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/116.0.0.0 Mobile Safari/537.36 XWEB/1160065 MMWEBSDK/20231202 MMWEBID/2247 MicroMessenger/8.0.47.2560(0x28002F30) WeChat/arm64 Weixin NetType/5G Language/zh_CN ABI/arm64 MiniProgramEnv/android', 'qm-from': 'wechat'}
     dl = requests.get(
         url='https://webapi.qmai.cn/web/catering/crm/personal-info', headers=headers).json()
     if dl['message'] == 'ok':
-        myprint(f"账号：{dl['data']['mobilePhone']}登录成功")
-        
+        print(f"账号：{dl['data']['mobilePhone']}登录成功")
+        send_msg += f"账号：{dl['data']['mobilePhone']}登录成功\n"
         # 新增旧版签到查询逻辑
         try:
             json_data = {
@@ -109,45 +110,52 @@ def yx(ck, uid):
             )
             
             result = response.json()
-            status_code = result.get('code', response.status_code)
+            status_code = result['code']
             
-            if status_code == 0:
-                data = result.get('data', {})
-                continuity_total = data.get('continuityTotal', 0)
-                sign_in_date_list = data.get('signInDateList', [])
-                activity_id = data.get('activityId', '')
+            if status_code == '0':
+                continuity_total = result['data']['continuityTotal']
+                sign_in_date_list = result['data']['signInDateList']
+                activity_id = result['data']['activityId']
                 
-                is_signed_today = datetime.now().strftime("%Y-%m-%d") in sign_in_date_list
+                today = time.strftime("%Y-%m-%d")
+                is_signed_today = today in sign_in_date_list
                 
-                myprint(f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天")
-                
+                print(f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天")
+                send_msg += f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天\n"
+
                 if not is_signed_today:
                     # 执行签到
-                    await sign_in(activity_id, headers, dl['data']['mobilePhone'], dl['data'].get('userName', ''))
+                    sign_in(activity_id, headers, dl['data']['mobilePhone'], dl['data'].get('name', ''))
+                    send_msg += f"旧版签到成功\n"
             else:
                 error_message = result.get('message', '')
-                myprint(f"查询旧版签到失败[{status_code}]: {error_message}")
-        
+                print(f"查询旧版签到失败[{status_code}]: {error_message}")
+                send_msg += f"查询旧版签到失败[{status_code}]: {error_message}\n"
+
         except Exception as e:
             print(f"查询旧版签到出错: {str(e)}")
-        
+            send_msg += f"查询旧版签到出错: {str(e)}\n"
         # 继续执行原有的签到逻辑
         timestamp = str(int(time.time() * 1000))
-        signature = generate_hash(activity_id, timestamp, uid)
-        data = {"activityId": activity_id, "appid": "wxafec6f8422cb357b",
+        signature = generate_hash("947079313798000641", timestamp, uid)
+        data = {"activityId": "947079313798000641", "appid": "wxafec6f8422cb357b",
                 "timestamp": timestamp, "signature": signature, "storeId": 49006}
         lq = requests.post(
             url='https://webapi.qmai.cn/web/cmk-center/sign/takePartInSign', data=data, headers=headers).json()
         if lq['message'] == 'ok':
-            myprint(
+            print(
                 f"签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}")
+            send_msg += f"签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}\n"
         else:
-            myprint(f"签到情况：{lq['message']}")
+            print(f"签到情况：{lq['message']}")
+            send_msg += f"签到情况：{lq['message']}\n"
     else:
         print('太久不打开小程序存在错误')
         print(dl)
+        send_msg += '太久不打开小程序存在错误\n'
 
-async def sign_in(activity_id, headers, mobile_phone, user_name):
+def sign_in(activity_id, headers, mobile_phone, user_name):
+    global send_msg
     json_data = {
         'activityId': activity_id,
         'mobilePhone': mobile_phone,
@@ -165,32 +173,47 @@ async def sign_in(activity_id, headers, mobile_phone, user_name):
     status_code = result.get('code', response.status_code)
     
     if status_code == 0:
-        myprint("旧版签到成功")
+        print("旧版签到成功")
+        send_msg += "旧版签到成功\n"
     else:
         error_message = result.get('message', '')
-        myprint(f"旧版签到失败[{status_code}]: {error_message}")
+        print(f"旧版签到失败[{status_code}]: {error_message}")
+        send_msg += f"旧版签到失败[{status_code}]: {error_message}\n"
 
 
 def main():
+    global send_msg
     z = 1
     for i, ck in enumerate(bwcjck):
         uid = bwcjuid[i]
         try:
-            myprint(f'登录第{z}个账号')
-            myprint('----------------------')
+            print(f'登录第{z}个账号')
+            send_msg += f'登录第{z}个账号\n'
+            print('----------------------')
             yx(ck, uid)
-            myprint('----------------------')
+            print('----------------------')
             z = z + 1
         except Exception as e:
-            print('未知错误')
+            print(f'未知错误：{e}')
+            send_msg += f'未知错误：{e}\n'
 
 
 if __name__ == '__main__':
     try:
         main()
     except Exception as e:
-        print('未知错误')
+        print(f'未知错误：{e}')
+        send_msg += f'未知错误：{e}\n'
+    
     try:
-        send_notification_message(title='霸王茶姬')  # 发送通知
+        # 在load_send中获取导入的send函数
+        send = load_send()
+
+        # 判断send是否可用再进行调用
+        if send:
+            send('霸王茶姬签到', send_msg)
+        else:
+            print('通知服务不可用')
     except Exception as e:
-        print('小错误')
+        if e:
+            print('发送通知消息失败！')
