@@ -23,6 +23,8 @@ import re
 import os
 import time
 import hashlib
+import json
+from datetime import datetime
 
 try:
     import marshal
@@ -93,19 +95,15 @@ def yx(ck, uid):
         url='https://webapi.qmai.cn/web/catering/crm/personal-info', headers=headers).json()
     if dl['message'] == 'ok':
         myprint(f"账号：{dl['data']['mobilePhone']}登录成功")
-
-        # 新增旧版签到逻辑
+        
+        # 新增旧版签到查询逻辑
         try:
-            activity_id = '947079313798000641'  # 假设这是正确的活动ID
             json_data = {
-                'activityId': activity_id,
-                'mobilePhone': dl['data']['mobilePhone'],
-                'userName': dl['data'].get('name', ''),
-                'appid': 'wxafec6f8422cb357b'
+                "appid": "wxafec6f8422cb357b"
             }
             
             response = requests.post(
-                'https://webapi.qmai.cn/web/catering/integral/sign/signIn',
+                'https://webapi.qmai.cn/web/catering/integral/sign/detail',
                 json=json_data,
                 headers=headers
             )
@@ -114,18 +112,29 @@ def yx(ck, uid):
             status_code = result.get('code', response.status_code)
             
             if status_code == 0:
-                myprint("旧版签到成功")
+                data = result.get('data', {})
+                continuity_total = data.get('continuityTotal', 0)
+                sign_in_date_list = data.get('signInDateList', [])
+                activity_id = data.get('activityId', '')
+                
+                is_signed_today = datetime.now().strftime("%Y-%m-%d") in sign_in_date_list
+                
+                myprint(f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天")
+                
+                if not is_signed_today:
+                    # 执行签到
+                    await sign_in(activity_id, headers, dl['data']['mobilePhone'], dl['data'].get('userName', ''))
             else:
                 error_message = result.get('message', '')
-                myprint(f"旧版签到失败[{status_code}]: {error_message}")
+                myprint(f"查询旧版签到失败[{status_code}]: {error_message}")
         
         except Exception as e:
-            print(f"旧版签到出错: {str(e)}")
-
+            print(f"查询旧版签到出错: {str(e)}")
+        
+        # 继续执行原有的签到逻辑
         timestamp = str(int(time.time() * 1000))
-        signature = generate_hash(
-            '947079313798000641', timestamp, uid)
-        data = {"activityId": "947079313798000641", "appid": "wxafec6f8422cb357b",
+        signature = generate_hash(activity_id, timestamp, uid)
+        data = {"activityId": activity_id, "appid": "wxafec6f8422cb357b",
                 "timestamp": timestamp, "signature": signature, "storeId": 49006}
         lq = requests.post(
             url='https://webapi.qmai.cn/web/cmk-center/sign/takePartInSign', data=data, headers=headers).json()
@@ -136,7 +145,30 @@ def yx(ck, uid):
             myprint(f"签到情况：{lq['message']}")
     else:
         print('太久不打开小程序存在错误')
-        print(lq)
+        print(dl)
+
+async def sign_in(activity_id, headers, mobile_phone, user_name):
+    json_data = {
+        'activityId': activity_id,
+        'mobilePhone': mobile_phone,
+        'userName': user_name,
+        'appid': 'wxafec6f8422cb357b'
+    }
+    
+    response = requests.post(
+        'https://webapi.qmai.cn/web/catering/integral/sign/signIn',
+        json=json_data,
+        headers=headers
+    )
+    
+    result = response.json()
+    status_code = result.get('code', response.status_code)
+    
+    if status_code == 0:
+        myprint("旧版签到成功")
+    else:
+        error_message = result.get('message', '')
+        myprint(f"旧版签到失败[{status_code}]: {error_message}")
 
 
 def main():
