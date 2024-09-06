@@ -144,11 +144,11 @@ def yx(ck, uid):
             url='https://webapi.qmai.cn/web/cmk-center/sign/takePartInSign', data=data, headers=headers).json()
         if lq['message'] == 'ok':
             print(
-                f"签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}")
-            send_msg += f"签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}\n"
+                f"新版签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}")
+            send_msg += f"新版签到情况：获得{lq['data']['rewardDetailList'][0]['rewardName']}：{lq['data']['rewardDetailList'][0]['sendNum']}\n"
         else:
-            print(f"签到情况：{lq['message']}")
-            send_msg += f"签到情况：{lq['message']}\n"
+            print(f"新版签到情况：{lq['message']}")
+            send_msg += f"新版签到情况：{lq['message']}\n"
     else:
         print('太久不打开小程序存在错误')
         print(dl)
