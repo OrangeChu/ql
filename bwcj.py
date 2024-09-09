@@ -15,7 +15,7 @@ export bwcjuid=""
 
 注意：ck 和 uid 需要顺序对应
 
-cron: 0 0,7 * * *
+cron: 0 8,10 * * *
 const $ = new Env("霸王茶姬签到");
 """
 import requests
