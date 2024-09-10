@@ -678,7 +678,7 @@ class YP:
 if __name__ == "__main__":
     env_name = 'ydypCk'
     py_name = '移动云盘'
-    token = os.getenv(env_name)
+    token = os.environ.get(env_name)
     if not token:
         print(f'⛔️未获取到ck变量：请检查变量 {env_name}是否填写')
         exit(0)
