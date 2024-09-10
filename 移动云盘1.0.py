@@ -139,7 +139,7 @@ class YP:
     def sso(self):
         sso_url = 'https://orches.yun.139.com/orchestration/auth-rebuild/token/v1.0/querySpecToken'
         sso_headers = {
-            'Authorization': self.Authorization,
+            'Authorization': 'Basic '+self.Authorization,
             'User-Agent': ua,
             'Content-Type': 'application/json',
             'Accept': '*/*',
@@ -679,6 +679,7 @@ if __name__ == "__main__":
     env_name = 'ydypCk'
     py_name = '移动云盘'
     token = os.environ.get(env_name)
+    print(token)
     if not token:
         print(f'⛔️未获取到ck变量：请检查变量 {env_name}是否填写')
         exit(0)
