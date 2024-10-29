@@ -97,44 +97,6 @@ def yx(ck, uid):
     if dl['message'] == 'ok':
         print(f"账号：{dl['data']['mobilePhone']}登录成功")
         send_msg += f"账号：{dl['data']['mobilePhone']}登录成功\n"
-        # 新增旧版签到查询逻辑
-        try:
-            json_data = {
-                "appid": "wxafec6f8422cb357b"
-            }
-            
-            response = requests.post(
-                'https://webapi.qmai.cn/web/catering/integral/sign/detail',
-                json=json_data,
-                headers=headers
-            )
-            
-            result = response.json()
-            status_code = result['code']
-            
-            if status_code == '0':
-                continuity_total = result['data']['continuityTotal']
-                sign_in_date_list = result['data']['signInDateList']
-                activity_id = result['data']['activityId']
-                
-                today = time.strftime("%Y-%m-%d")
-                is_signed_today = today in sign_in_date_list
-                
-                print(f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天")
-                send_msg += f"旧版签到今天{'已' if is_signed_today else '未'}签到, 已连续签到{continuity_total}天\n"
-
-                if not is_signed_today:
-                    # 执行签到
-                    sign_in(activity_id, headers, dl['data']['mobilePhone'], dl['data'].get('name', ''))
-                    send_msg += f"旧版签到成功\n"
-            else:
-                error_message = result.get('message', '')
-                print(f"查询旧版签到失败[{status_code}]: {error_message}")
-                send_msg += f"查询旧版签到失败[{status_code}]: {error_message}\n"
-
-        except Exception as e:
-            print(f"查询旧版签到出错: {str(e)}")
-            send_msg += f"查询旧版签到出错: {str(e)}\n"
         # 继续执行原有的签到逻辑
         timestamp = str(int(time.time() * 1000))
         signature = generate_hash("947079313798000641", timestamp, uid)
@@ -150,36 +112,9 @@ def yx(ck, uid):
             print(f"新版签到情况：{lq['message']}")
             send_msg += f"新版签到情况：{lq['message']}\n"
     else:
-        print('太久不打开小程序存在错误')
+        print('ck可能过期了')
         print(dl)
-        send_msg += '太久不打开小程序存在错误\n'
-
-def sign_in(activity_id, headers, mobile_phone, user_name):
-    global send_msg
-    json_data = {
-        'activityId': activity_id,
-        'mobilePhone': mobile_phone,
-        'userName': user_name,
-        'appid': 'wxafec6f8422cb357b'
-    }
-    
-    response = requests.post(
-        'https://webapi.qmai.cn/web/catering/integral/sign/signIn',
-        json=json_data,
-        headers=headers
-    )
-    
-    result = response.json()
-    status_code = result.get('code', response.status_code)
-    
-    if status_code == 0:
-        print("旧版签到成功")
-        send_msg += "旧版签到成功\n"
-    else:
-        error_message = result.get('message', '')
-        print(f"旧版签到失败[{status_code}]: {error_message}")
-        send_msg += f"旧版签到失败[{status_code}]: {error_message}\n"
-
+        send_msg += 'ck可能过期了\n'
 
 def main():
     global send_msg
